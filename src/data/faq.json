@@ -1,0 +1,737 @@
+{
+  "intents": [
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "cadastro_sistema",
+      "patterns": [
+        "Como realizar o cadastro no sistema?",
+        "Como me cadastrar no SGC?",
+        "Passo a passo para criar conta",
+        "Como cadastrar o usuario?",
+        "Como cadastrar um usuario no sistema?",
+        "Quero acessar o sistema pela primeira vez"
+      ],
+      "responses": [
+        "1. Acesse o endereço https://www.sgc.pe.gov.br em seu navegador. 2. Realize o login utilizando suas credenciais do SOGo/Expresso (usuário e senha). 3. Após o login, será exibida uma mensagem de autenticação contendo o link 'Clique aqui'. 4. Clique nesse link. Automaticamente, será enviado um e-mail de confirmação para o endereço cadastrado no SOGo. 5. Abra o e-mail recebido e clique no link de autenticação nele contido. Você será redirecionado à página principal do sistema. 6. Na tela inicial, clique no botão “Preencher informações”. 7. Complete todos os campos solicitados com atenção. 8. Ao finalizar o preenchimento, clique no botão “Gravar” para salvar os dados. Observações importantes: Certifique-se de que o e-mail de autenticação não foi direcionado para a caixa de spam ou lixo eletrônico. O procedimento de autenticação por e-mail é obrigatório na primeira vez ou quando houver solicitação de revalidação."
+      ]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "opcoes_acesso",
+      "patterns": [
+        "Quais são as opções de acesso disponíveis para entrar no sistema?",
+        "Como posso entrar no sistema?",
+        "Tem login pelo gov.br?",
+        "Posso usar o SOGo para acessar?"
+      ],
+      "responses": ["Login via gov.br ou via https://sogo.pe.gov.br/SOGo/"]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "acesso_imediato",
+      "patterns": [
+        "Após o cadastro, posso acessar imediatamente a ferramenta?",
+        "Posso acessar logo após o cadastro?",
+        "O acesso é imediato?",
+        "Preciso esperar aprovação para acessar?",
+        "Já posso usar o sistema depois de me cadastrar?"
+      ],
+      "responses": [
+        "Não. O cadastro precisa ser previamente aprovado para que o acesso à ferramenta seja liberado."
+      ]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "verificar_aprovacao",
+      "patterns": [
+        "Como verificar se meu cadastro foi aprovado ou reprovado?",
+        "Como saber se meu cadastro foi aprovado?",
+        "Meu acesso foi liberado?",
+        "Verificar status do meu perfil",
+        "Como ver se fui reprovado?"
+      ],
+      "responses": [
+        "O usuário deverá tentar entrar no sistema do SGC - https://sgc.pe.gov.br. 1. Se o cadastro foi aprovado, será possível ver as telas e áreas liberadas para o perfil aprovado. 2. Se o cadastro foi reprovado, será exibida uma mensagem de 'Acesso não autorizado' e não será possível navegar em nenhuma outra área do sistema."
+      ]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "edicao_dados_apos_aprovacao",
+      "patterns": [
+        "Após a aprovação do cadastro, é possível editar todos os campos dos meus dados cadastrais?",
+        "Posso editar meus dados depois de aprovado?",
+        "Como alterar meu cadastro após aprovado?",
+        "Consigo mudar minhas informações depois da aprovação?",
+        "Quais campos posso editar no cadastro?"
+      ],
+      "responses": [
+        "Não. Após o cadastro ser aprovado, apenas os campos da aba de 'Dados complementares' permanecerão habilitados para edição."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "solicitar_perfil",
+      "patterns": [
+        "Como solicitar um perfil de usuário no sistema?",
+        "Como pedir um perfil?",
+        "Como solicito um perfil de usuário?",
+        "Quero adicionar um perfil à minha conta",
+        "Passo a passo para solicitar perfil"
+      ],
+      "responses": [
+        "Na tela do formulário de Cadastro de Usuários, o usuário deve clicar em '+ Adicionar', então selecionar o perfil desejado e finalizar clicando em 'Salvar'."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "multiplos_perfis",
+      "patterns": [
+        "É permitido ter mais de um perfil associado à mesma conta?",
+        "Posso ter mais de um perfil?",
+        "É possível associar vários perfis à mesma conta?",
+        "Tenho limite de perfis na minha conta?"
+      ],
+      "responses": [
+        "Sim. Não há restrição para a quantidade de perfis selecionados."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "solicitacao_qualquer_perfil",
+      "patterns": [
+        "Posso solicitar qualquer tipo de perfil disponível?",
+        "Posso pedir qualquer perfil?",
+        "Tem restrição de qual perfil posso solicitar?",
+        "Preciso de um cargo específico para pedir um perfil?"
+      ],
+      "responses": [
+        "Sim. Não há restrições quanto ao tipo de perfil solicitado pelo usuário. No entanto, caberá ao(a) administrador(a) aprová-lo ou não."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "aprovacao_automatica_perfil",
+      "patterns": [
+        "Todos os perfis solicitados serão automaticamente aprovados?",
+        "Meu perfil é aprovado na hora?",
+        "A aprovação do perfil é automática?",
+        "Quem aprova meu perfil?",
+        "O admin pode mudar o perfil que pedi?"
+      ],
+      "responses": [
+        "Não. O(A) administrador(a) do sistema pode aprovar o cadastro mantendo os perfis solicitados, aprová-lo selecionando outros perfis diferentes daqueles que o usuário solicitou ou reprovar o cadastro por completo."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "orgao_nao_cadastrado",
+      "patterns": [
+        "O que fazer se, ao tentar cadastrar, perceber que meu órgão ainda não está cadastrado no sistema?",
+        "Meu órgão não aparece no cadastro",
+        "Como cadastrar meu órgão?",
+        "O que faço se não achar meu órgão na lista?",
+        "Órgão ausente no sistema"
+      ],
+      "responses": [
+        "Entrar em contato com um adm. do sistema, para que seja feita a solicitação de cadastro do órgão."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "ferias_gerente_temporario",
+      "patterns": [
+        "Em caso de férias do gerente da área, é possível conceder temporariamente o perfil de gerente a outro usuário?",
+        "Como passar o perfil de gerente nas férias?",
+        "Posso dar meu perfil de gerente para outro usuário temporariamente?",
+        "Substituição de gerente no sistema",
+        "Perfil de gerente substituto"
+      ],
+      "responses": [
+        "Sim, deverá entrar em contato com um administrador do sistema, para que seja feita a solicitação do perfil."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "notificacao_processos",
+      "patterns": [
+        "Como o sistema me avisa sobre novos processos para análise ou ações pendentes?",
+        "Como sou avisado de novos processos?",
+        "Onde vejo minhas notificações de processos pendentes?",
+        "Como sei que tenho uma ação pendente num processo?"
+      ],
+      "responses": [
+        "O processo aparecerá no painel de notificações e terá um sino vermelho ao lado. A coluna 'Fase Atual' indicará a ação que precisa ser realizada."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "pesquisa_processo",
+      "patterns": [
+        "Como realizar a pesquisa de um processo na tela principal?",
+        "Como faço para pesquisar um processo?",
+        "Onde busco um processo no sistema?",
+        "Tem campo de busca para achar processos?"
+      ],
+      "responses": ["Através do campo de busca ou dos filtros."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "verificar_fase_processo",
+      "patterns": [
+        "Como verificar em qual fase o processo se encontra atualmente?",
+        "Como saber a fase atual do processo?",
+        "Onde vejo em que etapa o processo está?",
+        "Como ver o andamento do processo?"
+      ],
+      "responses": [
+        "Observando a coluna 'Fase Atual' na tela inicial de visualização dos processos."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "consultar_tempo_processo",
+      "patterns": [
+        "Como consultar o tempo decorrido na fase atual e o tempo total do processo?",
+        "Onde vejo quanto tempo o processo está nessa fase?",
+        "Como saber o tempo total de um processo?",
+        "Ver tempo da fase e tempo total"
+      ],
+      "responses": [
+        "O usuário poderá consultar essas informações na tela de visualização do processo. Em que há um painel com informações gerais para visualização rápida, dentre elas estão o 'Tempo na Fase Atual' e o 'Tempo Total do Processo'."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "controle_prazos",
+      "patterns": [
+        "De que forma o sistema acompanha e controla os prazos dos processos?",
+        "Como o sistema controla os prazos?",
+        "Onde vejo o prazo restante do processo?",
+        "Acompanhamento de prazos no sistema"
+      ],
+      "responses": [
+        "Através da coluna \"Prazo restante\" na tela inicial de visão dos processos."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "tempo_processo_sad",
+      "patterns": [
+        "Como obter o tempo que o processo permaneceu na SAD?",
+        "Onde vejo quanto tempo o processo ficou na SAD?",
+        "Como saber o tempo na SAD?",
+        "Consultar tempo do processo na SAD"
+      ],
+      "responses": [
+        "Por meio do campo \"Tempo do Processo – SAD\", localizado na aba \"Detalhes do Processo\"."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "permissao_incluir_processo",
+      "patterns": [
+        "Quais perfis têm permissão para incluir novos processos?",
+        "Quem pode incluir processos?",
+        "Posso criar um novo processo?",
+        "Quais usuários conseguem adicionar processos?"
+      ],
+      "responses": ["Agente da Fase Preparatória e Administrador."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "visibilidade_processo_afp",
+      "patterns": [
+        "O usuário com perfil de Agente da Fase Preparatória pode visualizar processos de outros órgãos?",
+        "AFP vê processos de fora do órgão?",
+        "Consigo ver processos de outras secretarias como Agente da Fase Preparatória?",
+        "Visibilidade do Agente da Fase Preparatória"
+      ],
+      "responses": [
+        "Não. O AFP terá acesso apenas aos processos do órgão ao qual está vinculado, conforme cadastro de usuário."
+      ]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "acesso_area_sad",
+      "patterns": [
+        "Quais perfis conseguem acessar a área da SAD?",
+        "Quem entra na área da SAD?",
+        "Posso acessar a SAD?",
+        "Acesso exclusivo à área SAD"
+      ],
+      "responses": [
+        "Administrador, Gerente de Contratações, Agente de Contratações, Gerente Geral da Central de Licitações, Secretária(o) Executiva(o) de Contratações Públicas. Ou seja, todos com exceção do AFP."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "perfis_distribuir_processos",
+      "patterns": [
+        "Quais perfis podem distribuir processos?",
+        "Quem distribui os processos?",
+        "Posso distribuir um processo?",
+        "Como um processo é distribuído e por quem?"
+      ],
+      "responses": [
+        "Administrador, Gerente de Contratações, Gerente Geral da Central de Licitações, Secretária(o) Executiva(o) de Contratações Públicas."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "perfis_reprovar_processos",
+      "patterns": [
+        "Quais perfis têm autoridade para reprovar processos?",
+        "Quem reprova processos?",
+        "Quem pode negar um processo?",
+        "Autoridade para reprovação de processo"
+      ],
+      "responses": [
+        "Administrador, Gerente Geral da Central de Licitações, Secretária(o) Executiva(o) de Contratações Públicas."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "perfis_suspender_processos",
+      "patterns": [
+        "Quais perfis podem suspender processos?",
+        "Quem pode suspender um processo?",
+        "Como um processo é suspenso e por quem?",
+        "Posso suspender processos?"
+      ],
+      "responses": [
+        "Administrador, Secretária(o) Executiva(o) de Contratações Públicas."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "analise_cotas",
+      "patterns": [
+        "Qual perfil recebe os processos enviados para análise de cotas e pode aprovar ou reprovar essas cotas?",
+        "Quem aprova as cotas?",
+        "Análise de cotas de processo",
+        "Quem reprova as cotas?"
+      ],
+      "responses": ["Gerente de Contratações e Administrador."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "visao_agente_contratacoes",
+      "patterns": [
+        "Quais processos aparecem na tela de um usuário com perfil de Agente de Contratações?",
+        "O que o agente de contratações vê?",
+        "Processos visíveis para o agente de contratações",
+        "Sou agente de contratações, quais processos vejo?"
+      ],
+      "responses": ["Apenas os processos que foram atribuídos a ele."]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "acesso_area_orgaos",
+      "patterns": [
+        "Como acessar a área destinada aos órgãos no sistema?",
+        "Como entro na área de órgãos?",
+        "Onde fica a área dos órgãos?",
+        "Acesso à tela de órgãos"
+      ],
+      "responses": [
+        "Há duas maneiras: 1. Clicando em “Órgãos” na barra lateral. 2. Clicando na grade que abre o menu de aplicativos e depois em “Órgãos”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "inclusao_processo_orgao",
+      "patterns": [
+        "Onde, no sistema, devo iniciar a inclusão de um novo processo?",
+        "Como iniciar a inclusão de processo?",
+        "Por onde começo a criar um processo?",
+        "Incluir processo no órgão"
+      ],
+      "responses": [
+        "No botão “Incluir Processos”, localizado na tela de visualização inicial dos processos da área do Órgão."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "edicao_dados_afp",
+      "patterns": [
+        "Durante a inclusão do processo, é possível editar os dados do Agente da Fase Preparatória?",
+        "Posso mudar os dados do AFP no processo?",
+        "Editar agente da fase preparatória",
+        "Os dados do AFP são editáveis?"
+      ],
+      "responses": [
+        "Não é possível, pois os dados são carregados automaticamente, de acordo com o usuário logado no sistema."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "tipos_divisibilidade",
+      "patterns": [
+        "Quais são os tipos de divisibilidade do objeto disponíveis?",
+        "Como posso dividir o objeto?",
+        "Divisão por itens ou grupos",
+        "Quais as opções de divisibilidade?"
+      ],
+      "responses": ["Por itens e por grupos."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "importacao_planilhas",
+      "patterns": [
+        "É possível importar planilhas (por itens ou grupos) no sistema?",
+        "Posso enviar uma planilha de itens?",
+        "Como importar planilhas de grupos?",
+        "Sistema aceita importação de planilhas?"
+      ],
+      "responses": [
+        "Sim. O sistema permite a importação por meio do botão “Importar Planilha”, que será exibido na seção “Dados do Processo” na tela de “Inclusão do Processo”, após o usuário selecionar o tipo de divisibilidade de objeto."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "modelo_planilha",
+      "patterns": [
+        "Existe algum modelo de planilha disponível para download no sistema?",
+        "Onde baixo o modelo de planilha?",
+        "Download de planilha modelo",
+        "Tem modelo pronto de planilha de itens?"
+      ],
+      "responses": [
+        "Sim. O usuário poderá obter um modelo de planilha pronto para preenchimento clicando no botão “Baixar Modelo da Planilha”, que estará disponível na seção “Dados do Processo” da tela de “Inclusão do Processo”, após a seleção do tipo de divisibilidade de objeto."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "download_upload_mapa_precos",
+      "patterns": [
+        "Como realizar o download e o upload do arquivo do mapa de preços?",
+        "Download do mapa de preços",
+        "Como enviar o mapa de preços no sistema?",
+        "Upload da planilha de preços"
+      ],
+      "responses": [
+        "Na página de inclusão de processo, na aba Dados do processo, ao selecionar uma das opções de divisibilidade do objeto (Por itens ou por grupos), será exibido, na parte inferior da tela, um link para download do modelo da planilha de mapa de preços. Após realizar o download e o preenchimento correto da planilha conforme as orientações do modelo, clique no botão Importar Planilha para efetuar a importação dos dados."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "diferenca_nome_arquivo_documento",
+      "patterns": [
+        "Qual é a diferença entre o nome real do arquivo e o “Nome do Documento” cadastrado?",
+        "Qual a diferença do nome do arquivo para o documento?",
+        "Nome real x Nome do documento",
+        "O que é o nome do documento no sistema?"
+      ],
+      "responses": [
+        "O nome do arquivo é o nome original do arquivo, já o nome do documento é o nome que identifica o conteúdo no sistema também é o que será enviado ao SEI."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "formato_arquivo_cards",
+      "patterns": [
+        "Todos os cards aceitam qualquer formato de arquivo?",
+        "Quais formatos de arquivos os cards aceitam?",
+        "Posso anexar qualquer arquivo?",
+        "Limitação de formato de anexos"
+      ],
+      "responses": ["Não, alguns cards aceitam somente PDF."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "identificar_cards_pdf",
+      "patterns": [
+        "Como identificar quais cards aceitam apenas arquivos em formato PDF?",
+        "Como saber se o card só aceita PDF?",
+        "Onde vejo que só posso enviar PDF?",
+        "Aviso de arquivo em PDF"
+      ],
+      "responses": [
+        "Através da instrução complementar localizada no canto inferior da janela de anexar documentos."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "icone_visualizacao_arquivo",
+      "patterns": [
+        "O ícone de visualização (olho) aparece para todos os tipos de arquivos anexados?",
+        "Por que não consigo visualizar o arquivo que anexei?",
+        "O olho de visualizar não aparece",
+        "visualização de anexo"
+      ],
+      "responses": ["Não. Apenas para arquivos com extensão PDF."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "confirmacao_documentos_obrigatorios",
+      "patterns": [
+        "Na visão do órgão, ao anexar documentos durante a inclusão, como confirmar que nenhum documento obrigatório foi esquecido?",
+        "Como sei que esqueci algum documento obrigatório?",
+        "Faltou documento obrigatório",
+        "Documentos faltantes no envio do processo"
+      ],
+      "responses": [
+        "Algumas ações do sistema indicam que há documentos obrigatórios faltantes. São elas: 1. O processo não é enviado à SAD. 2. Ao tentar enviar o processo, o sistema vai marcar em vermelho os cards obrigatórios que estiverem vazios. 3. Ao tentar enviar o processo, o sistema exibe um alerta informando quais documentos obrigatórios ainda não foram anexados."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "exclusao_fase_processo",
+      "patterns": [
+        "Em qual fase do processo é possível excluí-lo?",
+        "Quando posso excluir um processo?",
+        "Posso apagar um processo?",
+        "Excluir processo em andamento"
+      ],
+      "responses": [
+        "Enquanto o processo está em cadastramento, ou seja, ainda não foi enviado para a SAD."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "exclusao_apos_envio_sad",
+      "patterns": [
+        "Após o envio para a SAD, ainda é possível excluir o processo?",
+        "Fiz o envio para a SAD, posso excluir?",
+        "Como excluir processo enviado à SAD?",
+        "Apagar processo na SAD"
+      ],
+      "responses": [
+        "Não. O processo só poderá ser excluído enquanto estiver em cadastramento. Após ser enviado à SAD essa ação não será mais permitida."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "edicao_apos_envio_sad",
+      "patterns": [
+        "Após o envio para a SAD, é permitido editar informações do processo?",
+        "Posso alterar processo na SAD?",
+        "Editar dados de processo enviado",
+        "Mudar informações depois de enviar à SAD"
+      ],
+      "responses": [
+        "Não. Após enviar o processo à SAD os dados cadastrados serão apenas exibidos, sem possibilidade de edição dos campos."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "etapas_edicao_processo",
+      "patterns": [
+        "Em quais etapas o processo pode ser editado?",
+        "Quando é possível editar o processo?",
+        "Fases onde a edição é permitida",
+        "Consigo editar o processo a qualquer momento?"
+      ],
+      "responses": [
+        "A edição é permitida apenas antes do envio à SAD. Enquanto o processo estiver em fase de cadastramento, o usuário poderá alterar os campos normalmente. E se for solicitado ajustes pela SAD."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "ajustes_dados_processo",
+      "patterns": [
+        "Como solicitar ajustes em um processo já encaminhado?",
+        "Onde localizar os documentos referentes aos ajustes solicitados?",
+        "Onde editar dados do processo, como Número do Edital, Data do Resultado e Valor Final?",
+        "Solicitar ajuste no processo",
+        "Documentos de ajuste"
+      ],
+      "responses": [
+        "Clicando na opção “Enviar para análise de cotas” no botão de “Ações no Processo” e descrevendo os ajustes no campo de “Justificativa” ou criando um documento de ajustes, clicando no botão “Criar documento de ajuste”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "historico_movimentacoes_processo",
+      "patterns": [
+        "Onde acompanhar o registro cronológico (histórico) de todas as movimentações do processo?",
+        "Como ver o histórico do processo?",
+        "Onde fica o registro de quem alterou o processo?",
+        "Acompanhar movimentações chronológicas"
+      ],
+      "responses": ["Através da aba “Histórico”."]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "marcar_processo_prioritario",
+      "patterns": [
+        "Como marcar um processo como prioritário?",
+        "Como colocar urgência no processo?",
+        "Definir processo como prioridade",
+        "Onde marco a prioridade?"
+      ],
+      "responses": [
+        "Clicando no botão “Definir como Prioridade”, na aba Detalhes do Processo”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "identificar_processos_prioritarios",
+      "patterns": [
+        "Como identificar rapidamente os processos que foram indicados como prioritários?",
+        "Como sei se um processo é prioritário?",
+        "Processos urgentes na lista",
+        "Sinalização de processos com prioridade"
+      ],
+      "responses": [
+        "Os processos prioritários estarão sinalizados com um ícone de exclamação vermelho e ficarão no topo da lista de processos."
+      ]
+    },
+    {
+      "category": "cadastro_e_acesso",
+      "tag": "acessar_area_sad",
+      "patterns": [
+        "Como acessar a área exclusiva da SAD?",
+        "Onde encontro a área da SAD?",
+        "Aceder ao ambiente da SAD",
+        "Login na SAD"
+      ],
+      "responses": [
+        "Há duas maneiras: 1. Clicando em “SAD” na barra lateral. 2. Clicando na grade que abre o menu de aplicativos e depois em “Acesso SAD”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "redistribuicao_processo_gerencia",
+      "patterns": [
+        "Recebi um processo que não pertence à minha gerência. Qual é o procedimento correto?",
+        "Processo errado na minha fila",
+        "Redistribuir processo de outra gerência",
+        "O que fazer se o processo não é meu?"
+      ],
+      "responses": [
+        "Entrar em contato com um adm. do sistema, para que seja feita a solicitação da redistribuição manual do processo."
+      ]
+    },
+    {
+      "category": "gestao_perfis_e_orgaoes",
+      "tag": "atualizar_gerencia_ac",
+      "patterns": [
+        "Um Agente de Contratações (AC) mudou permanentemente de gerência. Como atualizar essa informação no sistema?",
+        "Alterar gerência do Agente de Contratações",
+        "Mudei de setor, como atualizo minha gerência?",
+        "Transferência de AC no sistema"
+      ],
+      "responses": [
+        "Entrar em contato com um adm. do sistema, para que seja feita a solicitação de transferência de gerência."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "encaminhar_fase_externa",
+      "patterns": [
+        "Qual é o procedimento para encaminhar o processo à fase externa?",
+        "Como mandar para fase externa?",
+        "Passo a passo fase externa",
+        "Botão de encaminhar fase externa"
+      ],
+      "responses": [
+        "Selecionando a opção “Encaminhar para Fase Externa”, no botão “Ações no Processo”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "consultar_resultados_pncp",
+      "patterns": [
+        "Quais informações o sistema solicita ao tentar consultar os resultados?",
+        "Como funciona a consulta de resultados?",
+        "O que preciso para consultar resultados?",
+        "Consultar PNCP"
+      ],
+      "responses": [
+        "O usuário precisará fornecer o ID do PNCP para prosseguir com a consulta."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "encaminhar_processo_sei",
+      "patterns": [
+        "Como encaminhar um processo ao SEI e qual perfil pode executar essa ação?",
+        "Quem manda o processo pro SEI?",
+        "Como enviar pro SEI?",
+        "Integração do processo com o SEI"
+      ],
+      "responses": [
+        "Clicando na opção “Encaminhar para o SEI” no botão “Ações no Processo”. Apenas o perfil Agente de Contratações pode realizar essa ação."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "verificar_numero_sei",
+      "patterns": [
+        "Após o encaminhamento ao SEI, onde verificar o número do SEI gerado?",
+        "Onde vejo o número do SEI?",
+        "Como saber o número do processo gerado no SEI?",
+        "Consultar número do SEI"
+      ],
+      "responses": [
+        "O número do SEI gerado após o encaminhamento será armazenado no campo “N° SEI do Processo” e o usuário poderá visualizá-lo na aba “Detalhes do Processo”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "identificar_documentos_sei",
+      "patterns": [
+        "Na aba “Documentos do Processo”, como identificar quais documentos já foram encaminhados ao SEI?",
+        "Como saber quais arquivos já foram para o SEI?",
+        "Selo do SEI nos documentos",
+        "Quais anexos foram enviados ao SEI?"
+      ],
+      "responses": [
+        "Os documentos que já foram encaminhados ao SEI exibem um selo verde dentro do card ou no próprio card, conforme regras de negócio, com a indicação “Enviado para o Sei”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "enviar_documentos_adicionais_sei",
+      "patterns": [
+        "Após o encaminhamento ao SEI, é possível enviar documentos adicionais?",
+        "Posso anexar mais coisas depois de enviar pro SEI?",
+        "Como mandar anexos depois do envio ao SEI?",
+        "Documentos adicionais SEI"
+      ],
+      "responses": [
+        "Sim. Os documentos anexados após o processo ter sido encaminhado ao SEI, ficarão com um selo laranja exibido na tela de visualização dos documentos anexados ao card."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "selecionar_documentos_sei",
+      "patterns": [
+        "Quais cards permitem selecionar quais documentos anexados serão enviados ao SEI?",
+        "Dá para escolher o que mandar pro SEI?",
+        "Filtro de documentos para o SEI",
+        "Opção de selecionar anexos SEI"
+      ],
+      "responses": [
+        "“Tratativa com a GPCOM/ GEFRO/ GEPAC ou ATI (se for o caso)”, “Pesquisa de Preços”, “Anexos ao TR”, “Contratação Direta” e “Outros Documentos”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "consultar_resultados",
+      "patterns": [
+        "Onde consultar os resultados dos processos?",
+        "Ver o resultado final",
+        "Aba de resultados",
+        "Consultar se o processo foi deferido"
+      ],
+      "responses": [
+        "Na aba “Resultados”, clicando no botão “Consultar Resultados”."
+      ]
+    },
+    {
+      "category": "inclusao_visualizacao_processos",
+      "tag": "habilitar_finalizar_processo",
+      "patterns": [
+        "Qual ação é necessária para habilitar o botão “Finalizar Processo”?",
+        "Não consigo clicar em finalizar processo",
+        "Botão finalizar processo bloqueado",
+        "O que falta para finalizar o processo?"
+      ],
+      "responses": [
+        "É necessário que se consulte os resultados e que a consulta seja salva para que o botão “Finalizar Processo” seja habilitado."
+      ]
+    }
+  ]
+}
