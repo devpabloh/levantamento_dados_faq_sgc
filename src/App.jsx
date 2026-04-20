@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Pencil, Plus, Save, Search, Trash2, X } from 'lucide-react'
 import data from './data/faq.json'
 import ChatWidget from './components/ChatWidget' 
 import FloatingChat from './components/FloatingChat'
@@ -103,6 +103,9 @@ export default function App() {
   const [isSendModalOpen, setIsSendModalOpen] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [draggedItem, setDraggedItem] = useState(null)
+  const [dropTarget, setDropTarget] = useState(null)
 
   useEffect(() => {
     localStorage.setItem('faq_db', JSON.stringify(db))
@@ -135,6 +138,113 @@ export default function App() {
     return map
   }, [db.responses])
 
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+  const hasSearch = normalizedSearchTerm.length > 0
+
+  const visibleBySearch = useMemo(() => {
+    if (!hasSearch) return null
+
+    const visible = {
+      categories: new Set(),
+      tags: new Set(),
+      questions: new Set(),
+      responses: new Set(),
+    }
+
+    const tagsByCategoryId = new Map()
+    const questionsByTagId = new Map()
+    const responsesByQuestionId = new Map()
+    const tagsById = new Map()
+    const questionsById = new Map()
+
+    db.tags.forEach((tag) => {
+      tagsById.set(tag.id, tag)
+      if (!tagsByCategoryId.has(tag.category_id)) tagsByCategoryId.set(tag.category_id, [])
+      tagsByCategoryId.get(tag.category_id).push(tag)
+    })
+
+    db.questions.forEach((question) => {
+      questionsById.set(question.id, question)
+      if (!questionsByTagId.has(question.tag_id)) questionsByTagId.set(question.tag_id, [])
+      questionsByTagId.get(question.tag_id).push(question)
+    })
+
+    db.responses.forEach((response) => {
+      if (!responsesByQuestionId.has(response.question_id)) responsesByQuestionId.set(response.question_id, [])
+      responsesByQuestionId.get(response.question_id).push(response)
+    })
+
+    function includeQuestionDeep(questionId) {
+      visible.questions.add(questionId)
+      const question = questionsById.get(questionId)
+      if (!question) return
+
+      visible.tags.add(question.tag_id)
+      const tag = tagsById.get(question.tag_id)
+      if (tag) visible.categories.add(tag.category_id)
+
+      const responses = responsesByQuestionId.get(questionId) || []
+      responses.forEach((response) => visible.responses.add(response.id))
+    }
+
+    function includeTagDeep(tagId) {
+      visible.tags.add(tagId)
+      const tag = tagsById.get(tagId)
+      if (!tag) return
+
+      visible.categories.add(tag.category_id)
+      const questions = questionsByTagId.get(tagId) || []
+      questions.forEach((question) => includeQuestionDeep(question.id))
+    }
+
+    function includeCategoryDeep(categoryId) {
+      visible.categories.add(categoryId)
+      const tags = tagsByCategoryId.get(categoryId) || []
+      tags.forEach((tag) => includeTagDeep(tag.id))
+    }
+
+    db.categories.forEach((category) => {
+      if ((category.name ?? '').toLowerCase().includes(normalizedSearchTerm)) {
+        includeCategoryDeep(category.id)
+      }
+    })
+
+    db.tags.forEach((tag) => {
+      if ((tag.title ?? '').toLowerCase().includes(normalizedSearchTerm)) {
+        includeTagDeep(tag.id)
+      }
+    })
+
+    db.questions.forEach((question) => {
+      if ((question.body_questions ?? '').toLowerCase().includes(normalizedSearchTerm)) {
+        includeQuestionDeep(question.id)
+      }
+    })
+
+    db.responses.forEach((response) => {
+      if ((response.body_response ?? '').toLowerCase().includes(normalizedSearchTerm)) {
+        visible.responses.add(response.id)
+
+        const question = questionsById.get(response.question_id)
+        if (!question) return
+
+        visible.questions.add(question.id)
+        const tag = tagsById.get(question.tag_id)
+        if (!tag) return
+
+        visible.tags.add(tag.id)
+        visible.categories.add(tag.category_id)
+      }
+    })
+
+    return visible
+  }, [db, hasSearch, normalizedSearchTerm])
+
+  const categoriesToRender = useMemo(() => {
+    if (!hasSearch) return db.categories
+    return db.categories.filter((category) => visibleBySearch?.categories.has(category.id))
+  }, [db.categories, hasSearch, visibleBySearch])
+
   function toggleExpanded(kind, id) {
     if (kind === 'category') {
       setExpandedCategories((prev) => ({ ...prev, [id]: !prev[id] }))
@@ -156,6 +266,150 @@ export default function App() {
   function closeModal() {
     setModal({ open: false, mode: 'create', entity: 'category', item: null, parentId: null })
     setInputValue('')
+  }
+
+  function moveItemBefore(list, sourceId, targetId, transform) {
+    if (sourceId === targetId) return list
+
+    const sourceIndex = list.findIndex((item) => item.id === sourceId)
+    const targetIndex = list.findIndex((item) => item.id === targetId)
+    if (sourceIndex === -1 || targetIndex === -1) return list
+
+    const next = [...list]
+    const [moved] = next.splice(sourceIndex, 1)
+    const targetItem = next.find((item) => item.id === targetId)
+    const updated = transform ? transform(moved, targetItem) : moved
+    const insertAt = next.findIndex((item) => item.id === targetId)
+
+    next.splice(insertAt === -1 ? next.length : insertAt, 0, updated)
+    return next
+  }
+
+  function moveItemToParentEnd(list, sourceId, parentField, targetParentId) {
+    const sourceIndex = list.findIndex((item) => item.id === sourceId)
+    if (sourceIndex === -1) return list
+
+    const next = [...list]
+    const [moved] = next.splice(sourceIndex, 1)
+    const updated = { ...moved, [parentField]: targetParentId }
+
+    let insertAt = -1
+    next.forEach((item, index) => {
+      if (item[parentField] === targetParentId) insertAt = index + 1
+    })
+
+    if (insertAt === -1) insertAt = next.length
+    next.splice(insertAt, 0, updated)
+    return next
+  }
+
+  function isValidDropZone(source, targetEntity, targetId) {
+    if (!source) return false
+    if (source.entity === 'tag' && targetEntity === 'category') return source.parentId !== targetId
+    if (source.entity === 'question' && targetEntity === 'tag') return source.parentId !== targetId
+    if (source.entity === 'response' && targetEntity === 'question') return source.parentId !== targetId
+    return false
+  }
+
+  function isValidItemDrop(source, targetEntity, targetId) {
+    if (!source) return false
+    if (source.entity !== targetEntity) return false
+    return source.id !== targetId
+  }
+
+  function handleDragStart(entity, item, parentId) {
+    setDraggedItem({ entity, id: item.id, parentId })
+  }
+
+  function handleDragEnd() {
+    setDraggedItem(null)
+    setDropTarget(null)
+  }
+
+  function handleDropZoneDragOver(event, targetEntity, targetId) {
+    if (!isValidDropZone(draggedItem, targetEntity, targetId)) return
+    event.preventDefault()
+    setDropTarget({ scope: 'parent', entity: targetEntity, id: targetId })
+  }
+
+  function handleDropZoneDrop(event, targetEntity, targetId) {
+    if (!isValidDropZone(draggedItem, targetEntity, targetId)) return
+    event.preventDefault()
+
+    if (draggedItem.entity === 'tag' && targetEntity === 'category') {
+      setDb((prev) => ({
+        ...prev,
+        tags: moveItemToParentEnd(prev.tags, draggedItem.id, 'category_id', targetId),
+      }))
+    }
+
+    if (draggedItem.entity === 'question' && targetEntity === 'tag') {
+      setDb((prev) => ({
+        ...prev,
+        questions: moveItemToParentEnd(prev.questions, draggedItem.id, 'tag_id', targetId),
+      }))
+    }
+
+    if (draggedItem.entity === 'response' && targetEntity === 'question') {
+      setDb((prev) => ({
+        ...prev,
+        responses: moveItemToParentEnd(prev.responses, draggedItem.id, 'question_id', targetId),
+      }))
+    }
+
+    setDraggedItem(null)
+    setDropTarget(null)
+  }
+
+  function handleItemDragOver(event, targetEntity, targetId) {
+    if (!isValidItemDrop(draggedItem, targetEntity, targetId)) return
+    event.preventDefault()
+    setDropTarget({ scope: 'item', entity: targetEntity, id: targetId })
+  }
+
+  function handleItemDrop(event, targetEntity, targetItem) {
+    if (!isValidItemDrop(draggedItem, targetEntity, targetItem.id)) return
+    event.preventDefault()
+
+    if (targetEntity === 'category') {
+      setDb((prev) => ({
+        ...prev,
+        categories: moveItemBefore(prev.categories, draggedItem.id, targetItem.id),
+      }))
+    }
+
+    if (targetEntity === 'tag') {
+      setDb((prev) => ({
+        ...prev,
+        tags: moveItemBefore(prev.tags, draggedItem.id, targetItem.id, (moved, target) => ({
+          ...moved,
+          category_id: target.category_id,
+        })),
+      }))
+    }
+
+    if (targetEntity === 'question') {
+      setDb((prev) => ({
+        ...prev,
+        questions: moveItemBefore(prev.questions, draggedItem.id, targetItem.id, (moved, target) => ({
+          ...moved,
+          tag_id: target.tag_id,
+        })),
+      }))
+    }
+
+    if (targetEntity === 'response') {
+      setDb((prev) => ({
+        ...prev,
+        responses: moveItemBefore(prev.responses, draggedItem.id, targetItem.id, (moved, target) => ({
+          ...moved,
+          question_id: target.question_id,
+        })),
+      }))
+    }
+
+    setDraggedItem(null)
+    setDropTarget(null)
   }
 
   function submitModal(event) {
@@ -347,18 +601,53 @@ export default function App() {
             </button>
           </div>
 
-          {db.categories.length === 0 ? (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+              <Search size={16} className="text-slate-400" />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Pesquisar categoria, tag, pergunta ou resposta..."
+                className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
+              />
+              {hasSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          </div>
+
+          {categoriesToRender.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center text-slate-400">
-              Nenhuma categoria cadastrada.
+              {hasSearch ? 'Nenhum resultado para a pesquisa atual.' : 'Nenhuma categoria cadastrada.'}
             </div>
           ) : (
             <div className="space-y-3">
-              {db.categories.map((category) => {
-                const tags = tagsByCategory.get(category.id) || []
-                const isCategoryOpen = Boolean(expandedCategories[category.id])
+              {categoriesToRender.map((category) => {
+                const allTags = tagsByCategory.get(category.id) || []
+                const tags = hasSearch
+                  ? allTags.filter((tag) => visibleBySearch?.tags.has(tag.id))
+                  : allTags
+                const isCategoryOpen = hasSearch ? true : Boolean(expandedCategories[category.id])
 
                 return (
-                  <div key={category.id} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                  <div
+                    key={category.id}
+                    onDragOver={(event) => handleDropZoneDragOver(event, 'category', category.id)}
+                    onDrop={(event) => handleDropZoneDrop(event, 'category', category.id)}
+                    className={`rounded-xl border bg-slate-950/70 p-3 ${
+                      dropTarget?.scope === 'parent' &&
+                      dropTarget?.entity === 'category' &&
+                      dropTarget?.id === category.id
+                        ? 'border-emerald-400'
+                        : 'border-slate-800'
+                    }`}
+                  >
                     <RowHeader
                       label={category.name}
                       isOpen={isCategoryOpen}
@@ -366,6 +655,16 @@ export default function App() {
                       countLabel="tags"
                       onToggle={() => toggleExpanded('category', category.id)}
                       onEdit={() => openModal('edit', 'category', category)}
+                      draggable
+                      isDropTarget={
+                        dropTarget?.scope === 'item' &&
+                        dropTarget?.entity === 'category' &&
+                        dropTarget?.id === category.id
+                      }
+                      onDragStart={() => handleDragStart('category', category, null)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={(event) => handleItemDragOver(event, 'category', category.id)}
+                      onDrop={(event) => handleItemDrop(event, 'category', category)}
                       onDelete={() => deleteCategory(category.id)}
                     />
 
@@ -386,11 +685,25 @@ export default function App() {
                         ) : (
                           <div className="space-y-2">
                             {tags.map((tag) => {
-                              const questions = questionsByTag.get(tag.id) || []
-                              const isTagOpen = Boolean(expandedTags[tag.id])
+                              const allQuestions = questionsByTag.get(tag.id) || []
+                              const questions = hasSearch
+                                ? allQuestions.filter((question) => visibleBySearch?.questions.has(question.id))
+                                : allQuestions
+                              const isTagOpen = hasSearch ? true : Boolean(expandedTags[tag.id])
 
                               return (
-                                <div key={tag.id} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                <div
+                                  key={tag.id}
+                                  onDragOver={(event) => handleDropZoneDragOver(event, 'tag', tag.id)}
+                                  onDrop={(event) => handleDropZoneDrop(event, 'tag', tag.id)}
+                                  className={`rounded-lg border bg-slate-950/60 p-3 ${
+                                    dropTarget?.scope === 'parent' &&
+                                    dropTarget?.entity === 'tag' &&
+                                    dropTarget?.id === tag.id
+                                      ? 'border-emerald-400'
+                                      : 'border-slate-800'
+                                  }`}
+                                >
                                   <RowHeader
                                     label={tag.title}
                                     isOpen={isTagOpen}
@@ -398,6 +711,16 @@ export default function App() {
                                     countLabel="perguntas"
                                     onToggle={() => toggleExpanded('tag', tag.id)}
                                     onEdit={() => openModal('edit', 'tag', tag)}
+                                    draggable
+                                    isDropTarget={
+                                      dropTarget?.scope === 'item' &&
+                                      dropTarget?.entity === 'tag' &&
+                                      dropTarget?.id === tag.id
+                                    }
+                                    onDragStart={() => handleDragStart('tag', tag, tag.category_id)}
+                                    onDragEnd={handleDragEnd}
+                                    onDragOver={(event) => handleItemDragOver(event, 'tag', tag.id)}
+                                    onDrop={(event) => handleItemDrop(event, 'tag', tag)}
                                     onDelete={() => deleteTag(tag.id)}
                                   />
 
@@ -418,13 +741,24 @@ export default function App() {
                                       ) : (
                                         <div className="space-y-2">
                                           {questions.map((question) => {
-                                            const responses = responsesByQuestion.get(question.id) || []
-                                            const isQuestionOpen = Boolean(expandedQuestions[question.id])
+                                            const allResponses = responsesByQuestion.get(question.id) || []
+                                            const responses = hasSearch
+                                              ? allResponses.filter((response) => visibleBySearch?.responses.has(response.id))
+                                              : allResponses
+                                            const isQuestionOpen = hasSearch ? true : Boolean(expandedQuestions[question.id])
 
                                             return (
                                               <div
                                                 key={question.id}
-                                                className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+                                                onDragOver={(event) => handleDropZoneDragOver(event, 'question', question.id)}
+                                                onDrop={(event) => handleDropZoneDrop(event, 'question', question.id)}
+                                                className={`rounded-md border bg-slate-950/50 p-3 ${
+                                                  dropTarget?.scope === 'parent' &&
+                                                  dropTarget?.entity === 'question' &&
+                                                  dropTarget?.id === question.id
+                                                    ? 'border-emerald-400'
+                                                    : 'border-slate-800'
+                                                }`}
                                               >
                                                 <RowHeader
                                                   label={question.body_questions}
@@ -433,6 +767,16 @@ export default function App() {
                                                   countLabel="respostas"
                                                   onToggle={() => toggleExpanded('question', question.id)}
                                                   onEdit={() => openModal('edit', 'question', question)}
+                                                  draggable
+                                                  isDropTarget={
+                                                    dropTarget?.scope === 'item' &&
+                                                    dropTarget?.entity === 'question' &&
+                                                    dropTarget?.id === question.id
+                                                  }
+                                                  onDragStart={() => handleDragStart('question', question, question.tag_id)}
+                                                  onDragEnd={handleDragEnd}
+                                                  onDragOver={(event) => handleItemDragOver(event, 'question', question.id)}
+                                                  onDrop={(event) => handleItemDrop(event, 'question', question)}
                                                   onDelete={() => deleteQuestion(question.id)}
                                                 />
 
@@ -443,6 +787,11 @@ export default function App() {
                                                       responses={responses}
                                                       onSave={upsertResponse}
                                                       onDelete={deleteResponse}
+                                                      onDragStartResponse={handleDragStart}
+                                                      onDragEndResponse={handleDragEnd}
+                                                      onDragOverResponse={handleItemDragOver}
+                                                      onDropResponse={handleItemDrop}
+                                                      dropTarget={dropTarget}
                                                     />
                                                   </div>
                                                 )}
@@ -514,6 +863,7 @@ export default function App() {
           </div>
         </div>
       )}
+
       <div className='flex items-center justify-center mt-4'>
         <button onClick={() => setIsSendModalOpen(true)} 
       className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold hover:bg-indigo-500 hover:cursor-pointer">Enviar informações</button>
@@ -554,9 +904,30 @@ export default function App() {
   )
 }
 
-function RowHeader({ label, isOpen, count, countLabel, onToggle, onEdit, onDelete }) {
+function RowHeader({
+  label,
+  isOpen,
+  count,
+  countLabel,
+  onToggle,
+  onEdit,
+  onDelete,
+  draggable = false,
+  isDropTarget = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
+}) {
   return (
-    <div className="flex items-start justify-between gap-3">
+    <div
+      className={`flex items-start justify-between gap-3 rounded-md ${isDropTarget ? 'ring-1 ring-emerald-400' : ''}`}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <button onClick={onToggle} className="flex flex-1 items-start gap-2 text-left hover:text-indigo-300">
         {isOpen ? <ChevronDown size={16} className="mt-1" /> : <ChevronRight size={16} className="mt-1" />}
         <div>
@@ -587,7 +958,17 @@ function RowHeader({ label, isOpen, count, countLabel, onToggle, onEdit, onDelet
   )
 }
 
-function ResponseSection({ questionId, responses, onSave, onDelete }) {
+function ResponseSection({
+  questionId,
+  responses,
+  onSave,
+  onDelete,
+  onDragStartResponse,
+  onDragEndResponse,
+  onDragOverResponse,
+  onDropResponse,
+  dropTarget,
+}) {
   const [editingId, setEditingId] = useState(null)
   const [text, setText] = useState('')
 
@@ -624,7 +1005,19 @@ function ResponseSection({ questionId, responses, onSave, onDelete }) {
       ) : (
         <div className="space-y-2">
           {responses.map((response, index) => (
-            <div key={response.id} className="flex items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-3 py-2">
+            <div
+              key={response.id}
+              draggable
+              onDragStart={() => onDragStartResponse('response', response, questionId)}
+              onDragEnd={onDragEndResponse}
+              onDragOver={(event) => onDragOverResponse(event, 'response', response.id)}
+              onDrop={(event) => onDropResponse(event, 'response', response)}
+              className={`flex items-center justify-between gap-2 rounded-md border bg-slate-950/70 px-3 py-2 ${
+                dropTarget?.scope === 'item' && dropTarget?.entity === 'response' && dropTarget?.id === response.id
+                  ? 'border-emerald-400'
+                  : 'border-slate-800'
+              }`}
+            >
               <p className="line-clamp-2 flex-1 text-sm text-slate-300">
                 {index + 1}. {response.body_response}
               </p>
