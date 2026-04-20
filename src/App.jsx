@@ -620,6 +620,9 @@ export default function App() {
                 </button>
               )}
             </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Dica: arraste categorias, tags, perguntas e respostas para reorganizar ou mover entre grupos.
+            </p>
           </div>
 
           {categoriesToRender.length === 0 ? (
