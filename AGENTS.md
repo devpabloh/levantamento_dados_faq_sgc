@@ -1,23 +1,32 @@
 # AGENTS.md
 
 ## Fast path
-- Use npm (repo has `package-lock.json`). Install with `npm ci`.
-- Start dev server with `npm run dev`.
-- Validate changes with `npm run lint` and `npm run build` (no test/typecheck scripts are configured).
-- Preview production build with `npm run preview`.
+- Package manager: npm (`package-lock.json` is present). Install with `npm ci`.
+- Local dev: `npm run dev`.
+- Full validation order: `npm run lint` then `npm run build`.
+- Preview production build: `npm run preview`.
+- No `test` or `typecheck` scripts are defined in `package.json`.
 
 ## Repo shape
 - Single-package Vite app (not a monorepo).
-- Runtime entrypoint: `src/main.jsx` -> renders `App` from `src/App.jsx`.
-- Most product logic/UI is centralized in `src/App.jsx` (large single-file feature).
-- Active global styling is in `src/index.css` (Tailwind + custom classes).
-- `src/App.css` is template leftover and currently not imported.
+- Entrypoint is `src/main.jsx`, which renders `src/App.jsx`.
+- Core product behavior is concentrated in `src/App.jsx` (FAQ CRUD tree + "Enviar informacoes" flow submission modal).
+- Chat integration is split across `src/components/FloatingChat.tsx`, `src/components/ChatWidget.tsx`, and `src/lib/chatApi.ts`.
+- Seed FAQ source is `src/data/faq.json`; it is normalized to `{ categories, tags, questions, responses }` on initial load.
 
-## Behavior and data model you can break easily
-- App state is persisted to browser `localStorage` under key `faq_db` in `src/App.jsx`; UI changes survive reload.
-- If you need a clean slate while testing, clear `faq_db` in browser storage.
-- Core hierarchy is `categories -> tags -> questions -> responses`; selection/navigation logic depends on these foreign-key fields (`category_id`, `tag_id`, `question_id`).
-- IDs are generated with `Date.now()` in CRUD helpers; changing ID strategy affects add/update/delete behavior.
+## Easy-to-miss behavior
+- FAQ data persists in browser `localStorage` key `faq_db`; once saved, it overrides `src/data/faq.json` until storage is cleared.
+- If FAQ seed edits appear ignored, clear `localStorage.faq_db` and reload.
+- Data links are relational: `categories -> tags -> questions -> responses` via `category_id`, `tag_id`, and `question_id`; delete logic depends on these links for cascade cleanup.
+- New IDs for user-created records come from `makeId()` in `src/App.jsx` (`Date.now() + random`); changing ID semantics can break edit/delete targeting.
+
+## Env and integration
+- `VITE_FLOW_URL` is required for the "Enviar informacoes" action (`sendJsonToFlowPowerAutomateFlow` throws if unset).
+- Chat API uses `VITE_API_BASE_URL` and defaults to `http://localhost:5000` when unset.
+- `.env.example` only documents `VITE_FLOW_URL`; add `VITE_API_BASE_URL` manually for non-local chat backends.
 
 ## Tooling quirks
-- Tailwind is wired through both `@tailwindcss/vite` in `vite.config.js` and CSS directives in `src/index.css` (`@import "tailwindcss"` + `@config "../tailwind.config.js"`); keep this wiring intact when refactoring styles.
+- Tailwind is wired in two places: `@tailwindcss/vite` in `vite.config.js` and `@import "tailwindcss"` + `@config "../tailwind.config.js"` in `src/index.css`.
+- `vite.config.js` uses `base: './'`; relative asset paths are intentional.
+- ESLint targets only `**/*.{js,jsx}`; `npm run lint` does not check `*.ts`/`*.tsx`.
+- If you need a manual type check, run `npx tsc --noEmit` (TypeScript config exists, just no npm script).
