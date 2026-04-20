@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
-import { DndContext, PointerSensor, closestCenter, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { ChevronDown, ChevronRight, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
 import data from './data/faq.json'
+import ChatWidget from './components/ChatWidget' 
 import FloatingChat from './components/FloatingChat'
 
 function normalizeDataFaq(raw){
@@ -15,6 +13,9 @@ function normalizeDataFaq(raw){
   const categoryMap = new Map()
   const tagMap = new Map()
 
+  const tagCountByCategory = new Map() 
+  const questionCountByTag = new Map()
+
   let id = 1
   const nextid = () => id++
 
@@ -24,27 +25,43 @@ function normalizeDataFaq(raw){
     if(!categoryId){
       categoryId = nextid()
       categoryMap.set(intent.category, categoryId)
-      categories.push({id: categoryId, name: intent.category})
+      categories.push({
+        id: categoryId, 
+        name: intent.category,
+        position: categories.length
+      })
     }
 
     const tagKey = `${categoryId}:${intent.tag}`
     let tagId = tagMap.get(tagKey)
+    
     if(!tagId){
+
       tagId = nextid()
       tagMap.set(tagKey, tagId)
+
+      const tagPosition = tagCountByCategory.get(categoryId) ?? 0 
+      tagCountByCategory.set(categoryId,tagPosition + 1)
+
       tags.push({
         id: tagId, 
         title: intent.tag,
-        category_id: categoryId
+        category_id: categoryId,
+        position: tagPosition,
       })
     }
 
     for (const pattern of intent.patterns ?? []){
       const questionId = nextid()
+
+      const questionPosition = questionCountByTag.get(tagId) ?? 0
+      questionCountByTag.set(tagId, questionPosition + 1)
+
       questions.push({
         id: questionId,
         body_questions: pattern,
-        tag_id: tagId
+        tag_id: tagId,
+        position: questionCountByTag
       })
 
       for(const responseText of intent.responses ?? []){
@@ -63,57 +80,6 @@ const INITIAL_DB = normalizeDataFaq(data)
 
 function makeId() {
   return Date.now() + Math.floor(Math.random() * 1000)
-}
-
-function reorderByIds(list, activeId, overId) {
-  const oldIndex = list.findIndex((item) => item.id === activeId)
-  const newIndex = list.findIndex((item) => item.id === overId)
-
-  if (oldIndex === -1 || newIndex === -1) return list
-
-  return arrayMove(list, oldIndex, newIndex)
-}
-
-function reorderByParent(list, parentKey, parentId, activeId, overId) {
-  const groupedItems = list.filter((item) => item[parentKey] === parentId)
-  const reorderedGroup = reorderByIds(groupedItems, activeId, overId)
-
-  if (groupedItems === reorderedGroup) return list
-
-  let groupIndex = 0
-  return list.map((item) => {
-    if (item[parentKey] !== parentId) return item
-    const nextItem = reorderedGroup[groupIndex]
-    groupIndex += 1
-    return nextItem
-  })
-}
-
-function moveItemToParent(list, parentKey, activeId, toParentId, overId = null) {
-  const activeIndex = list.findIndex((item) => item.id === activeId)
-  if (activeIndex === -1) return list
-
-  const activeItem = { ...list[activeIndex], [parentKey]: toParentId }
-  const withoutActive = list.filter((item) => item.id !== activeId)
-
-  let insertIndex = -1
-  if (overId !== null) {
-    insertIndex = withoutActive.findIndex((item) => item.id === overId)
-  }
-
-  if (insertIndex === -1) {
-    insertIndex = withoutActive.length
-    for (let index = withoutActive.length - 1; index >= 0; index -= 1) {
-      if (withoutActive[index][parentKey] === toParentId) {
-        insertIndex = index + 1
-        break
-      }
-    }
-  }
-
-  const next = [...withoutActive]
-  next.splice(insertIndex, 0, activeItem)
-  return next
 }
 
 export default function App() {
@@ -137,8 +103,6 @@ export default function App() {
   const [isSendModalOpen, setIsSendModalOpen] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState('')
-
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   useEffect(() => {
     localStorage.setItem('faq_db', JSON.stringify(db))
@@ -309,71 +273,6 @@ export default function App() {
     }))
   }
 
-  function handleDragEnd(event) {
-    const { active, over } = event
-    if (!over) return
-
-    const activeData = active.data.current
-    const overData = over.data.current
-
-    if (!activeData || !overData || activeData.entity !== overData.entity) return
-
-    setDb((prev) => {
-      if (activeData.entity === 'category') {
-        if (activeData.itemId === overData.itemId) return prev
-
-        return {
-          ...prev,
-          categories: reorderByIds(prev.categories, activeData.itemId, overData.itemId),
-        }
-      }
-
-      if (activeData.entity === 'tag') {
-        const overItemId = overData.kind === 'item' ? overData.itemId : null
-        const sameParent = activeData.parentId === overData.parentId
-
-        return {
-          ...prev,
-          tags: sameParent
-            ? overItemId === null || activeData.itemId === overItemId
-              ? prev.tags
-              : reorderByParent(prev.tags, 'category_id', activeData.parentId, activeData.itemId, overItemId)
-            : moveItemToParent(prev.tags, 'category_id', activeData.itemId, overData.parentId, overItemId),
-        }
-      }
-
-      if (activeData.entity === 'question') {
-        const overItemId = overData.kind === 'item' ? overData.itemId : null
-        const sameParent = activeData.parentId === overData.parentId
-
-        return {
-          ...prev,
-          questions: sameParent
-            ? overItemId === null || activeData.itemId === overItemId
-              ? prev.questions
-              : reorderByParent(prev.questions, 'tag_id', activeData.parentId, activeData.itemId, overItemId)
-            : moveItemToParent(prev.questions, 'tag_id', activeData.itemId, overData.parentId, overItemId),
-        }
-      }
-
-      if (activeData.entity === 'response') {
-        const overItemId = overData.kind === 'item' ? overData.itemId : null
-        const sameParent = activeData.parentId === overData.parentId
-
-        return {
-          ...prev,
-          responses: sameParent
-            ? overItemId === null || activeData.itemId === overItemId
-              ? prev.responses
-              : reorderByParent(prev.responses, 'question_id', activeData.parentId, activeData.itemId, overItemId)
-            : moveItemToParent(prev.responses, 'question_id', activeData.itemId, overData.parentId, overItemId),
-        }
-      }
-
-      return prev
-    })
-  }
-
   const modalLabel =
     modal.entity === 'category' ? 'Categoria' : modal.entity === 'tag' ? 'Tag' : 'Pergunta'
 
@@ -453,165 +352,118 @@ export default function App() {
               Nenhuma categoria cadastrada.
             </div>
           ) : (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext
-                items={db.categories.map((category) => `category:${category.id}`)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-3">
-                  {db.categories.map((category) => {
-                    const tags = tagsByCategory.get(category.id) || []
-                    const isCategoryOpen = Boolean(expandedCategories[category.id])
+            <div className="space-y-3">
+              {db.categories.map((category) => {
+                const tags = tagsByCategory.get(category.id) || []
+                const isCategoryOpen = Boolean(expandedCategories[category.id])
 
-                    return (
-                      <SortableContainer
-                        key={category.id}
-                        id={`category:${category.id}`}
-                        data={{ kind: 'item', entity: 'category', itemId: category.id, parentId: null }}
-                      >
-                        {({ dragAttributes, dragListeners }) => (
-                          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-                            <RowHeader
-                              label={category.name}
-                              isOpen={isCategoryOpen}
-                              count={tags.length}
-                              countLabel="tags"
-                              onToggle={() => toggleExpanded('category', category.id)}
-                              onEdit={() => openModal('edit', 'category', category)}
-                              onDelete={() => deleteCategory(category.id)}
-                              dragAttributes={dragAttributes}
-                              dragListeners={dragListeners}
-                            />
+                return (
+                  <div key={category.id} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                    <RowHeader
+                      label={category.name}
+                      isOpen={isCategoryOpen}
+                      count={tags.length}
+                      countLabel="tags"
+                      onToggle={() => toggleExpanded('category', category.id)}
+                      onEdit={() => openModal('edit', 'category', category)}
+                      onDelete={() => deleteCategory(category.id)}
+                    />
 
-                            {isCategoryOpen && (
-                              <div className="mt-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                                <div className="mb-3 flex items-center justify-between">
-                                  <h3 className="text-sm font-semibold text-slate-300">Tags da categoria</h3>
-                                  <button
-                                    onClick={() => openModal('create', 'tag', null, category.id)}
-                                    className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold hover:bg-indigo-500"
-                                  >
-                                    <Plus size={14} /> Nova tag
-                                  </button>
-                                </div>
+                    {isCategoryOpen && (
+                      <div className="mt-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                        <div className="mb-3 flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-slate-300">Tags da categoria</h3>
+                          <button
+                            onClick={() => openModal('create', 'tag', null, category.id)}
+                            className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold hover:bg-indigo-500"
+                          >
+                            <Plus size={14} /> Nova tag
+                          </button>
+                        </div>
 
-                                <SortableContext
-                                  items={tags.map((tag) => `tag:${tag.id}`)}
-                                  strategy={verticalListSortingStrategy}
-                                >
-                                  <div className="space-y-2">
-                                    {tags.length === 0 && <p className="text-sm text-slate-500">Nenhuma tag para esta categoria.</p>}
-                                    {tags.map((tag) => {
-                                      const questions = questionsByTag.get(tag.id) || []
-                                      const isTagOpen = Boolean(expandedTags[tag.id])
+                        {tags.length === 0 ? (
+                          <p className="text-sm text-slate-500">Nenhuma tag para esta categoria.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {tags.map((tag) => {
+                              const questions = questionsByTag.get(tag.id) || []
+                              const isTagOpen = Boolean(expandedTags[tag.id])
 
-                                      return (
-                                        <SortableContainer
-                                          key={tag.id}
-                                          id={`tag:${tag.id}`}
-                                          data={{ kind: 'item', entity: 'tag', itemId: tag.id, parentId: tag.category_id }}
+                              return (
+                                <div key={tag.id} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                  <RowHeader
+                                    label={tag.title}
+                                    isOpen={isTagOpen}
+                                    count={questions.length}
+                                    countLabel="perguntas"
+                                    onToggle={() => toggleExpanded('tag', tag.id)}
+                                    onEdit={() => openModal('edit', 'tag', tag)}
+                                    onDelete={() => deleteTag(tag.id)}
+                                  />
+
+                                  {isTagOpen && (
+                                    <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/50 p-3">
+                                      <div className="mb-3 flex items-center justify-between">
+                                        <h4 className="text-sm font-semibold text-slate-300">Perguntas da tag</h4>
+                                        <button
+                                          onClick={() => openModal('create', 'question', null, tag.id)}
+                                          className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold hover:bg-indigo-500"
                                         >
-                                          {({ dragAttributes, dragListeners }) => (
-                                            <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                                              <RowHeader
-                                                label={tag.title}
-                                                isOpen={isTagOpen}
-                                                count={questions.length}
-                                                countLabel="perguntas"
-                                                onToggle={() => toggleExpanded('tag', tag.id)}
-                                                onEdit={() => openModal('edit', 'tag', tag)}
-                                                onDelete={() => deleteTag(tag.id)}
-                                                dragAttributes={dragAttributes}
-                                                dragListeners={dragListeners}
-                                              />
+                                          <Plus size={14} /> Nova pergunta
+                                        </button>
+                                      </div>
 
-                                              {isTagOpen && (
-                                                <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/50 p-3">
-                                                  <div className="mb-3 flex items-center justify-between">
-                                                    <h4 className="text-sm font-semibold text-slate-300">Perguntas da tag</h4>
-                                                    <button
-                                                      onClick={() => openModal('create', 'question', null, tag.id)}
-                                                      className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold hover:bg-indigo-500"
-                                                    >
-                                                      <Plus size={14} /> Nova pergunta
-                                                    </button>
+                                      {questions.length === 0 ? (
+                                        <p className="text-sm text-slate-500">Nenhuma pergunta para esta tag.</p>
+                                      ) : (
+                                        <div className="space-y-2">
+                                          {questions.map((question) => {
+                                            const responses = responsesByQuestion.get(question.id) || []
+                                            const isQuestionOpen = Boolean(expandedQuestions[question.id])
+
+                                            return (
+                                              <div
+                                                key={question.id}
+                                                className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+                                              >
+                                                <RowHeader
+                                                  label={question.body_questions}
+                                                  isOpen={isQuestionOpen}
+                                                  count={responses.length}
+                                                  countLabel="respostas"
+                                                  onToggle={() => toggleExpanded('question', question.id)}
+                                                  onEdit={() => openModal('edit', 'question', question)}
+                                                  onDelete={() => deleteQuestion(question.id)}
+                                                />
+
+                                                {isQuestionOpen && (
+                                                  <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/40 p-3">
+                                                    <ResponseSection
+                                                      questionId={question.id}
+                                                      responses={responses}
+                                                      onSave={upsertResponse}
+                                                      onDelete={deleteResponse}
+                                                    />
                                                   </div>
-
-                                                  <SortableContext
-                                                    items={questions.map((question) => `question:${question.id}`)}
-                                                    strategy={verticalListSortingStrategy}
-                                                  >
-                                                    <div className="space-y-2">
-                                                      {questions.length === 0 && (
-                                                        <p className="text-sm text-slate-500">Nenhuma pergunta para esta tag.</p>
-                                                      )}
-                                                      {questions.map((question) => {
-                                                        const responses = responsesByQuestion.get(question.id) || []
-                                                        const isQuestionOpen = Boolean(expandedQuestions[question.id])
-
-                                                        return (
-                                                          <SortableContainer
-                                                            key={question.id}
-                                                            id={`question:${question.id}`}
-                                                            data={{
-                                                              kind: 'item',
-                                                              entity: 'question',
-                                                              itemId: question.id,
-                                                              parentId: question.tag_id,
-                                                            }}
-                                                          >
-                                                            {({ dragAttributes, dragListeners }) => (
-                                                              <div className="rounded-md border border-slate-800 bg-slate-950/50 p-3">
-                                                                <RowHeader
-                                                                  label={question.body_questions}
-                                                                  isOpen={isQuestionOpen}
-                                                                  count={responses.length}
-                                                                  countLabel="respostas"
-                                                                  onToggle={() => toggleExpanded('question', question.id)}
-                                                                  onEdit={() => openModal('edit', 'question', question)}
-                                                                  onDelete={() => deleteQuestion(question.id)}
-                                                                  dragAttributes={dragAttributes}
-                                                                  dragListeners={dragListeners}
-                                                                />
-
-                                                                {isQuestionOpen && (
-                                                                  <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/40 p-3">
-                                                                    <ResponseSection
-                                                                      questionId={question.id}
-                                                                      responses={responses}
-                                                                      onSave={upsertResponse}
-                                                                      onDelete={deleteResponse}
-                                                                    />
-                                                                  </div>
-                                                                )}
-                                                              </div>
-                                                            )}
-                                                          </SortableContainer>
-                                                        )
-                                                      })}
-                                                      <DropZone id={`question-drop:${tag.id}`} entity="question" parentId={tag.id} />
-                                                    </div>
-                                                  </SortableContext>
-                                                </div>
-                                              )}
-                                            </div>
-                                          )}
-                                        </SortableContainer>
-                                      )
-                                    })}
-                                    <DropZone id={`tag-drop:${category.id}`} entity="tag" parentId={category.id} />
-                                  </div>
-                                </SortableContext>
-                              </div>
-                            )}
+                                                )}
+                                              </div>
+                                            )
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
                           </div>
                         )}
-                      </SortableContainer>
-                    )
-                  })}
-                </div>
-              </SortableContext>
-            </DndContext>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           )}
           <FloatingChat/>
         </section>
@@ -702,17 +554,7 @@ export default function App() {
   )
 }
 
-function RowHeader({
-  label,
-  isOpen,
-  count,
-  countLabel,
-  onToggle,
-  onEdit,
-  onDelete,
-  dragAttributes,
-  dragListeners,
-}) {
+function RowHeader({ label, isOpen, count, countLabel, onToggle, onEdit, onDelete }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <button onClick={onToggle} className="flex flex-1 items-start gap-2 text-left hover:text-indigo-300">
@@ -726,16 +568,6 @@ function RowHeader({
       </button>
 
       <div className="flex items-center gap-1">
-        <button
-          type="button"
-          {...dragAttributes}
-          {...dragListeners}
-          className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-          title="Arrastar para reordenar"
-          aria-label="Arrastar para reordenar"
-        >
-          <GripVertical size={14} />
-        </button>
         <button
           onClick={onEdit}
           className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-indigo-300"
@@ -787,53 +619,35 @@ function ResponseSection({ questionId, responses, onSave, onDelete }) {
         </button>
       </div>
 
-      <SortableContext items={responses.map((response) => `response:${response.id}`)} strategy={verticalListSortingStrategy}>
+      {responses.length === 0 ? (
+        <p className="text-sm text-slate-500">Nenhuma resposta cadastrada.</p>
+      ) : (
         <div className="space-y-2">
-          {responses.length === 0 && <p className="text-sm text-slate-500">Nenhuma resposta cadastrada.</p>}
           {responses.map((response, index) => (
-            <SortableContainer
-              key={response.id}
-              id={`response:${response.id}`}
-              data={{ kind: 'item', entity: 'response', itemId: response.id, parentId: response.question_id }}
-            >
-              {({ dragAttributes, dragListeners }) => (
-                <div className="flex items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-3 py-2">
-                  <p className="line-clamp-2 flex-1 text-sm text-slate-300">
-                    {index + 1}. {response.body_response}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      {...dragAttributes}
-                      {...dragListeners}
-                      className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                      title="Arrastar resposta"
-                      aria-label="Arrastar resposta"
-                    >
-                      <GripVertical size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(response)}
-                      className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-indigo-300"
-                      title="Editar resposta"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => onDelete(response.id)}
-                      className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-rose-300"
-                      title="Excluir resposta"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </SortableContainer>
+            <div key={response.id} className="flex items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-950/70 px-3 py-2">
+              <p className="line-clamp-2 flex-1 text-sm text-slate-300">
+                {index + 1}. {response.body_response}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleEdit(response)}
+                  className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-indigo-300"
+                  title="Editar resposta"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  onClick={() => onDelete(response.id)}
+                  className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-rose-300"
+                  title="Excluir resposta"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
           ))}
-          <DropZone id={`response-drop:${questionId}`} entity="response" parentId={questionId} compact />
         </div>
-      </SortableContext>
+      )}
 
       <textarea
         value={text}
@@ -849,37 +663,6 @@ function ResponseSection({ questionId, responses, onSave, onDelete }) {
       >
         <Save size={14} /> {editingId ? 'Atualizar resposta' : 'Adicionar resposta'}
       </button>
-    </div>
-  )
-}
-
-function SortableContainer({ id, data, children }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, data })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.7 : 1,
-  }
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      {children({ dragAttributes: attributes, dragListeners: listeners })}
-    </div>
-  )
-}
-
-function DropZone({ id, entity, parentId, compact = false }) {
-  const { setNodeRef, isOver } = useDroppable({ id, data: { kind: 'container', entity, parentId } })
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`rounded-md border border-dashed px-3 text-center text-xs transition-colors ${
-        compact ? 'py-2' : 'py-3'
-      } ${isOver ? 'border-indigo-400 bg-indigo-500/10 text-indigo-200' : 'border-slate-700 text-slate-500'}`}
-    >
-      Solte aqui para mover
     </div>
   )
 }
