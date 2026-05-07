@@ -84,7 +84,7 @@ export default function ChatWidget(){
 
       <form onSubmit={onSend} className="flex gap-2 border-t border-slate-200 p-3 bg-indigo-500">
         <input
-          className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500 bg-white"
+          className="flex-1 rounded-xl border border-slate-300 md:px-3 md:py-2 text-sm text-slate-900 outline-none focus:border-slate-500 bg-white"
           placeholder="Digite sua pergunta..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -92,7 +92,7 @@ export default function ChatWidget(){
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 cursor-pointer"
+          className="rounded-xl bg-slate-900 py-1 px-2 md:px-4 md:py-2 text-sm font-medium text-white disabled:opacity-60 cursor-pointer"
         >
           Enviar
         </button>
