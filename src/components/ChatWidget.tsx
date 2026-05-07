@@ -15,7 +15,7 @@ export default function ChatWidget(){
  const [messages, setMessages] = useState<message[]>([
     {
         from: "bot",
-        text: "Olá! Como posso ajudar no SGC?"
+        text: "Olá! Eu sou a Júlia, sua assistente virtual. Em que posso te ajudar hoje?"
     }
  ])
 
@@ -64,7 +64,7 @@ export default function ChatWidget(){
           <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={[
-                "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
+                "max-w-[95%] rounded-2xl px-3 py-2 text-sm",
                 m.from === "user"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-800",
@@ -92,7 +92,7 @@ export default function ChatWidget(){
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 cursor-pointer"
         >
           Enviar
         </button>
