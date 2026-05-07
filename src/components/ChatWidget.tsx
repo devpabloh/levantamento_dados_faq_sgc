@@ -59,7 +59,7 @@ export default function ChatWidget(){
  return (
      <div className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-      <div className="h-96 space-y-3 overflow-y-auto p-4">
+      <div className="h-60 md:h-96 space-y-3 overflow-y-auto p-4">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
             <div
