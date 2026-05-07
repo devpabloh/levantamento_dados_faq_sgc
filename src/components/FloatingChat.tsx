@@ -37,7 +37,7 @@ export default function FloatingChat() {
               <h3 className="text-sm font-semibold text-white-800 ">Assistente virtual do SGC</h3>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-1 text-xs text-white-600 hover:bg-slate-100 "
+                className="rounded-md px-2 py-1 text-xs text-white-600 hover:bg-gray-500 cursor-pointer "
               >
                 X
               </button>
