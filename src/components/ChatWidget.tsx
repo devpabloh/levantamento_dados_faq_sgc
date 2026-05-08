@@ -15,7 +15,7 @@ export default function ChatWidget(){
  const [messages, setMessages] = useState<message[]>([
     {
         from: "bot",
-        text: "Olá! Eu sou a Júlia, sua assistente virtual. Em que posso te ajudar hoje?"
+        text: "Olá! Eu sou o Estevão, seu assistente virtual. Em que posso te ajudar hoje?"
     }
  ])
 
