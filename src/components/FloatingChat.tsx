@@ -31,7 +31,7 @@ export default function FloatingChat() {
         </button>
 
       {open && (
-        <div className="fixed bottom-28 md:bottom-35 right-16 md:right-46 z-50 w-[65vw] md:w-[92vw] max-w-md">
+        <div className="fixed bottom-41 md:bottom-35 right-16 md:right-46 z-50 w-[80vw] md:w-[92vw] max-w-md">
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-indigo-500 shadow-2xl">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h3 className="text-sm font-semibold text-white-800 ">Assistente virtual do SGC</h3>
