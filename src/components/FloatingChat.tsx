@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ChatWidget from "./ChatWidget";
-import lisleft from "../assets/julia.png"
-import juliaMostrandoIcon from "../assets/julia_mostrar_chat.png";
+import lisleft from "../assets/estevao-Photoroom.png"
+import juliaMostrandoIcon from "../assets/avatarEstevao.png";
 
 
 
@@ -12,7 +12,7 @@ export default function FloatingChat() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-3 right-4 md:right-2 z-50 h-25 w-30 md:h-45 md:w-55 overflow-hidden hover:cursor-pointer"
+        className="fixed bottom-3 right-4 md:right-0 z-50 h-35 w-30 md:h-65 md:w-55 overflow-hidden hover:cursor-pointer"
         aria-label={open ? "Fechar chat" : "Abrir chat"}
         >
         {open ? (
@@ -31,7 +31,7 @@ export default function FloatingChat() {
         </button>
 
       {open && (
-        <div className="fixed bottom-28 md:bottom-35 right-16 md:right-40 z-50 w-[65vw] md:w-[92vw] max-w-md">
+        <div className="fixed bottom-28 md:bottom-35 right-16 md:right-46 z-50 w-[65vw] md:w-[92vw] max-w-md">
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-indigo-500 shadow-2xl">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h3 className="text-sm font-semibold text-white-800 ">Assistente virtual do SGC</h3>
