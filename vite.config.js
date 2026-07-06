@@ -7,5 +7,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
     
-  ],base: './'
+  ],base: './',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://hml-gsa.pe.gov.br',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })

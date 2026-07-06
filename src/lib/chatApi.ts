@@ -15,9 +15,8 @@ export type channel = "telegram" | "whatsapp"
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function sendMessage(payload: chatbotRequest, channel: channel = "telegram"):Promise<chatbotResponse>{
-    const endPoint = `${API_BASE_URL}/api/v1/${channel}/webhook`
 
-    const res = await fetch(endPoint, {
+    const res = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {"Content-type": "application/json"},
         body: JSON.stringify(payload)
