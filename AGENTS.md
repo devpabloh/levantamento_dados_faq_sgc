@@ -22,7 +22,7 @@
 
 ## Env and integration
 - `VITE_FLOW_URL` is required for the "Enviar informacoes" action (`sendJsonToFlowPowerAutomateFlow` throws if unset).
-- Chat API uses `VITE_API_BASE_URL` and defaults to `http://localhost:5000` when unset.
+- Chat API uses `VITE_API_BASE_URL` and defaults to `https://hml-gsa.pe.gov.br/api/v1/telegram/webhook` when unset.
 - `.env.example` only documents `VITE_FLOW_URL`; add `VITE_API_BASE_URL` manually for non-local chat backends.
 
 ## Tooling quirks

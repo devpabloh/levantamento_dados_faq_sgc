@@ -12,7 +12,7 @@ export interface chatbotResponse {
 
 export type channel = "telegram" | "whatsapp"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function sendMessage(payload: chatbotRequest, channel: channel = "telegram"):Promise<chatbotResponse>{
     const endPoint = `${API_BASE_URL}/api/v1/${channel}/webhook`
