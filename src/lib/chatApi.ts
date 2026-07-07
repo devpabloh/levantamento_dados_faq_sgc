@@ -21,7 +21,7 @@ export async function sendMessage(payload: chatbotRequest, channel: channel = "t
         method: "POST",
         headers: {
             "Content-type": "application/json",
-            "Origin": "https://levantamento-dados-faq-sgc.vercel.app"
+            "Origin": ORIGIN
         },
         body: JSON.stringify(payload)
     })
