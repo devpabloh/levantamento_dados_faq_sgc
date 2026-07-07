@@ -13,12 +13,16 @@ export interface chatbotResponse {
 export type channel = "telegram" | "whatsapp"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const ORIGIN = import.meta.env.VITE_ORIGIN;
 
 export async function sendMessage(payload: chatbotRequest, channel: channel = "telegram"):Promise<chatbotResponse>{
 
     const res = await fetch(API_BASE_URL, {
         method: "POST",
-        headers: {"Content-type": "application/json"},
+        headers: {
+            "Content-type": "application/json",
+            "Origin": "https://levantamento-dados-faq-sgc.vercel.app"
+        },
         body: JSON.stringify(payload)
     })
 
